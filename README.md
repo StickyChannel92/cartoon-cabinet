@@ -10,7 +10,7 @@ a locally-hosted website to organize cartoons
 ```
 python3 -m venv ./venv
 source ./venv/bin/activate
-pip install -r requirements
+pip install -r requirements.txt
 python3 cartoon_server.py
 ```
 6. open http://localhost:7777 in your browser
