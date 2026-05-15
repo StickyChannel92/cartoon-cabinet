@@ -363,7 +363,7 @@
 </div>
 
 <script>
-// ── State ────────────────────────────────────────────────────────────────────
+// ── State ────────────────────────────────────────────────────────────
 const state = {
   currentTab: 'tv',
   tvShows: [],
@@ -377,7 +377,7 @@ const state = {
   subtracks: [],
 };
 
-// ── Init ─────────────────────────────────────────────────────────────────────
+// ── Init ────────────────────────────────────────────────────────────
 async function init() {
   try {
     const [tv, movies] = await Promise.all([
@@ -396,7 +396,7 @@ async function init() {
   document.getElementById('app').style.display = 'block';
 }
 
-// ── Render helpers ────────────────────────────────────────────────────────────
+// ── Render helpers ────────────────────────────────────────────────────────
 function imgUrl(encoded) {
   if (!encoded) return null;
   return `/file?path=${encoded}`;
@@ -460,13 +460,14 @@ function makePlaceholder(name, icon) {
   return div;
 }
 
-// ── TV ────────────────────────────────────────────────────────────────────────
+// ── TV ────────────────────────────────────────────────────────────
 function renderTV(shows) {
   const grid = document.getElementById('tv-grid');
   grid.innerHTML = '';
   if (!shows.length) { grid.innerHTML = '<div class="error-box">No TV shows found.</div>'; return; }
-  shows.forEach((s, i) => {
-    grid.appendChild(makeCard(s.thumb, s.name, s.campaign, '📺', () => openShow(i)));
+  shows.forEach((s) => {
+    const idx = state.tvShows.indexOf(s);
+    grid.appendChild(makeCard(s.thumb, s.name, s.campaign, '📺', () => openShow(idx)));
   });
 }
 
@@ -515,7 +516,7 @@ function renderShowDetail(show, data) {
   // Description
   if (show.description) {
     const descBox = document.createElement('div');
-    descBox.style.cssText = 'background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: .88rem; line-height: 1.6; color: var(--muted);';
+    descBox.style.cssText = 'background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: .88rem; line-height: 1.6; color: var(--text);';
     descBox.textContent = show.description;
     document.getElementById('disclaimers-container').appendChild(descBox);
   }
@@ -623,13 +624,14 @@ function playEpisode(idx, prefix) {
   loadPlayer(eps, idx);
 }
 
-// ── Movies ────────────────────────────────────────────────────────────────────
+// ── Movies ────────────────────────────────────────────────────────────
 function renderMovies(movies) {
   const grid = document.getElementById('movies-grid');
   grid.innerHTML = '';
   if (!movies.length) { grid.innerHTML = '<div class="error-box">No movies found.</div>'; return; }
-  movies.forEach((m, i) => {
-    grid.appendChild(makeCard(m.cover, m.name, null, '🎥', () => playMovie(i)));
+  movies.forEach((m) => {
+    const idx = state.movies.indexOf(m);
+    grid.appendChild(makeCard(m.cover, m.name, null, '🎥', () => playMovie(idx)));
   });
 }
 
@@ -641,7 +643,7 @@ function playMovie(idx) {
   loadPlayer([movie], 0);
 }
 
-// ── Player ────────────────────────────────────────────────────────────────────
+// ── Player ────────────────────────────────────────────────────────────
 async function loadPlayer(eps, idx) {
   showView('player-view');
   state.queueIndex = idx;
@@ -748,7 +750,7 @@ function backFromPlayer() {
   }
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────────────────
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -790,7 +792,7 @@ function showLoading(on) {
   if (!on) document.getElementById('app').style.display = 'block';
 }
 
-// ── Start ────────────────────────────────────────────────────────────────────
+// ── Start ────────────────────────────────────────────────────────────
 init();
 </script>
 </body>
