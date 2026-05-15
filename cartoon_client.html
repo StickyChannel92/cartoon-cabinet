@@ -375,6 +375,7 @@ const state = {
   queueIndex: 0,
   playerSource: null, // 'show' or 'movie'
   subtracks: [],
+  tvScrollY: 0,
 };
 
 // ── Init ────────────────────────────────────────────────────────────
@@ -472,6 +473,8 @@ function renderTV(shows) {
 }
 
 async function openShow(idx) {
+  state.tvScrollY = window.scrollY;
+
   const show = state.tvShows[idx];
   state.currentShow = show;
   showLoading(true);
@@ -482,6 +485,7 @@ async function openShow(idx) {
   showLoading(false);
   renderShowDetail(show, state.currentShowData);
   showView('show-view');
+  window.scrollTo(0, 0);
 }
 
 function renderShowDetail(show, data) {
@@ -767,7 +771,14 @@ function switchTab(tab) {
 function backToGrid() {
   const video = document.getElementById('main-video');
   video.pause();
+
   showView(state.currentTab === 'movies' ? 'movies-view' : 'tv-view');
+
+  if (state.currentTab === 'tv') {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, state.tvScrollY || 0);
+    });
+  }
 }
 
 function goHome() {
