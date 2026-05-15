@@ -16,21 +16,34 @@ python3 cartoon_server.py
 6. open http://localhost:7777 in your browser
 
 # to make a desktop shortcut:
-1. create `Cartoon Cabinet.desktop` with the following text (change the bash commands according to your client directory)
+1. create a shortcut with the following text (change the bash commands according to your client directory)
+Linux:
 ```
-#!/usr/bin/env xdg-open
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Cartoon Server
-Comment=Run cartoon_server.py and open localhost
-Terminal=true
-Exec=bash -c 'source /home/username/Documents/cartoons/venv/bin/activate && python /home/username/Documents/cartoons/cartoon_server.py & sleep 2 && xdg-open http://localhost:7777/ && wait'
-Icon=utilities-terminal
-Categories=Entertainment;Cartoons;Movies and TV;
+#!/bin/bash
+source /home/users/sagan/Documents/cartoons/venv/bin/activate
+python /home/users/sagan/Documents/cartoons/cartoon_server.py &
+sleep 2
+open http://localhost:7777/
+wait
 ```
-2. double click on it and mark as Trusted
-3. simply access your client by opening this desktop entry
+Windows:
+```
+@echo off
+call C:\Users\sagan\Documents\cartoons\venv\Scripts\activate.bat
+start "" http://localhost:7777/
+python C:\Users\sagan\Documents\cartoons\cartoon_server.py
+```
+MacOS:
+```
+#!/bin/bash
+source /Users/sagan/Documents/cartoons/venv/bin/activate
+python /Users/sagan/Documents/cartoons/cartoon_server.py &
+sleep 2
+open http://localhost:7777/
+wait
+```
+2. for Linux or MacOS, run `chmod +x ./cartoon_cabinet.sh`
+3. simply access your client by running this script and save it wherever you want.
 
 # documentation
 * TV shows use the txt method of displaying metadata, via `metadata.txt` in the TV show's directory
