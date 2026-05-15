@@ -4,7 +4,7 @@ a locally-hosted website to organize cartoons
 # to use
 1. unzip the client to wherever you want
 2. edit cartoon_server.py and change the directories to your liking
-3. install ffmpeg via `sudo apt install ffmpeg`
+3. install ffmpeg via `sudo apt install ffmpeg` (Linux), add the ffmpeg executable into your PATH (Windows) or use homebrew `brew install python3 ffmpeg` (MacOS)
 4. cd to the directory
 5. run the following commands
 ```
@@ -16,7 +16,7 @@ python3 cartoon_server.py
 6. open http://localhost:7777 in your browser
 
 # to make a desktop shortcut:
-1. Create `Cartoon Cabinet.desktop` with the following text (change the bash commands according to your client directory)
+1. create `Cartoon Cabinet.desktop` with the following text (change the bash commands according to your client directory)
 ```
 #!/usr/bin/env xdg-open
 [Desktop Entry]
@@ -55,7 +55,7 @@ DATE: 20xx
 * subtitles are automatically detected either by the media container, or an SRT file
 * the misc directories (MISC_DIRS) will list all of their contents at once, useful for a theatrical shorts or indie animation folder
 * you can specify which directories will be excluded from being scanned, in SKIP_DIRS
-* the host can be changed on the last line of the python script.
+* the host can be changed on the last line of the python script
 ```
 app.run(host='0.0.0.0', port=7777, debug=False, threaded=True)
 ```
