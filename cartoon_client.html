@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 Cartoon Cabinet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #161929;
+    --surface2: #1e2438;
+    --border: #2a3050;
+    --accent: #ff6b35;
+    --accent2: #ffd23f;
+    --accent3: #06d6a0;
+    --blue: #4cc9f0;
+    --purple: #7b5ea7;
+    --text: #e8eaf6;
+    --muted: #7b85a8;
+    --card-w: 160px;
+    --card-h: 240px;
+    --radius: 12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Nunito', sans-serif; overflow-x: hidden; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* ── Header ── */
+  #header {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 24px;
+    background: linear-gradient(180deg, #0d0f1a 80%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  #logo {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.7rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+    cursor: pointer;
+    user-select: none;
+  }
+  #logo span { -webkit-text-fill-color: var(--text); }
+  #tabs { display: flex; gap: 8px; margin-left: 8px; }
+  .tab {
+    padding: 7px 20px; border-radius: 20px; border: 2px solid var(--border);
+    background: transparent; color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-size: .9rem; font-weight: 700; cursor: pointer; transition: all .2s;
+    letter-spacing: .5px;
+  }
+  .tab:hover { border-color: var(--accent); color: var(--text); }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #search-wrap { margin-left: auto; position: relative; }
+  #search {
+    background: var(--surface2); border: 1.5px solid var(--border); border-radius: 20px;
+    padding: 7px 16px 7px 36px; color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: .9rem; width: 220px; outline: none; transition: border-color .2s;
+  }
+  #search:focus { border-color: var(--accent); }
+  #search-wrap::before {
+    content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    font-size: .8rem; pointer-events: none;
+  }
+
+  /* ── Views ── */
+  .view { display: none; padding: 28px 24px; }
+  .view.active { display: block; }
+
+  /* ── Section heading ── */
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem; color: var(--accent2);
+    margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr));
+    gap: 20px;
+  }
+
+  /* ── Card ── */
+  .card {
+    cursor: pointer; border-radius: var(--radius);
+    background: var(--surface); border: 1.5px solid var(--border);
+    transition: transform .18s, border-color .18s, box-shadow .18s;
+    overflow: hidden; position: relative;
+  }
+  .card:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: var(--accent);
+    box-shadow: 0 8px 32px rgba(255,107,53,.25);
+  }
+  .card-img {
+    width: 100%; aspect-ratio: 2/3; object-fit: cover;
+    background: var(--surface2);
+    display: block;
+  }
+  .card-img.placeholder {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem; aspect-ratio: 2/3;
+  }
+  .card-label {
+    padding: 8px 10px;
+    font-size: .8rem; font-weight: 700; color: var(--text);
+    text-align: center; line-height: 1.3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .campaign-badge {
+    position: absolute; top: 6px; left: 6px;
+    background: var(--purple); color: #fff; font-size: .65rem; font-weight: 800;
+    padding: 2px 7px; border-radius: 10px; letter-spacing: .5px;
+  }
+
+  /* ── Show detail ── */
+  #show-view { display: none; }
+  #show-view.active { display: block; }
+  .show-hero {
+    position: relative; height: 280px; overflow: hidden;
+    border-radius: var(--radius); margin-bottom: 24px;
+  }
+  .show-fanart {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: brightness(.5);
+  }
+  .show-hero-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: flex-end; gap: 20px;
+    padding: 24px;
+    background: linear-gradient(0deg, rgba(13,15,26,.95) 0%, transparent 60%);
+  }
+  .show-thumb {
+    width: 110px; height: 165px; object-fit: cover;
+    border-radius: 8px; border: 2px solid var(--border);
+    flex-shrink: 0;
+  }
+  .show-info h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem; color: var(--text); line-height: 1.2;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .show-info .flag-emoji {
+    font-size: 1.8rem;
+  }
+  .show-info .english-title {
+    font-size: .9rem; color: var(--muted); margin-top: 4px; font-weight: 600;
+  }
+  .show-info .source-text {
+    font-size: .85rem; color: var(--accent2); margin-top: 6px; font-weight: 700;
+  }
+  .show-info .meta-text {
+    font-size: .85rem; color: var(--muted); margin-top: 10px;
+    max-height: 120px; overflow-y: auto; line-height: 1.5;
+  }
+
+  .disclaimer-box {
+    background: rgba(255,210,63,.07); border: 1.5px solid var(--accent2);
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+    font-size: .82rem; color: var(--accent2); line-height: 1.5;
+  }
+  .disclaimer-box strong { display: block; margin-bottom: 4px; font-size: .75rem; letter-spacing: .5px; text-transform: uppercase; }
+
+  /* ── Season tabs ── */
+  .season-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .season-tab {
+    padding: 6px 16px; border-radius: 16px; border: 1.5px solid var(--border);
+    background: transparent; color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-size: .85rem; font-weight: 700; cursor: pointer; transition: all .15s;
+  }
+  .season-tab:hover { border-color: var(--blue); color: var(--text); }
+  .season-tab.active { background: var(--blue); border-color: var(--blue); color: #000; }
+
+  /* ── Episode list ── */
+  .episode-list { display: flex; flex-direction: column; gap: 6px; }
+  .ep-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 8px;
+    background: var(--surface2); border: 1.5px solid transparent;
+    cursor: pointer; transition: all .15s;
+  }
+  .ep-item:hover { border-color: var(--accent3); background: rgba(6,214,160,.07); }
+  .ep-num {
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
+    color: var(--accent); min-width: 32px; text-align: right;
+  }
+  .ep-name { font-size: .88rem; font-weight: 600; flex: 1; }
+  .ep-play { font-size: 1.1rem; opacity: .6; }
+  .ep-item:hover .ep-play { opacity: 1; }
+
+  .sub-section-title {
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
+    color: var(--accent3); margin: 20px 0 10px;
+    padding-left: 4px; border-left: 3px solid var(--accent3);
+    padding-left: 10px;
+  }
+
+  /* ── Player ── */
+  #player-view { display: none; background: #000; }
+  #player-view.active { display: flex; flex-direction: column; min-height: calc(100vh - 57px); }
+  #video-wrap {
+    position: relative; background: #000;
+    flex: 1; display: flex; align-items: center; justify-content: center;
+  }
+  #main-video {
+    width: 100%; max-height: 72vh;
+    background: #000;
+  }
+  .player-controls {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px; background: var(--surface);
+    border-top: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .btn-back {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 8px;
+    border: 1.5px solid var(--border); background: transparent;
+    color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: .9rem; font-weight: 700; cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+  .now-playing {
+    font-size: .88rem; font-weight: 700; color: var(--muted);
+  }
+  .now-playing span { color: var(--text); }
+  #sub-select-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: .85rem; }
+  #sub-select {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 5px 10px;
+    font-family: 'Nunito', sans-serif; font-size: .82rem; cursor: pointer;
+  }
+  #ep-queue { padding: 16px 20px; background: var(--surface); border-top: 1px solid var(--border); }
+  #ep-queue h3 { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--accent2); margin-bottom: 10px; }
+  .queue-list { display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow-y: auto; }
+  .queue-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 12px; border-radius: 6px;
+    cursor: pointer; transition: background .12s; font-size: .84rem;
+    border: 1px solid transparent;
+  }
+  .queue-item:hover { background: var(--surface2); }
+  .queue-item.playing { background: rgba(255,107,53,.12); border-color: var(--accent); }
+  .queue-item .q-num { color: var(--accent); font-weight: 800; min-width: 28px; }
+  .queue-item .q-name { flex: 1; font-weight: 600; }
+
+  /* ── Loading ── */
+  #loading {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 999; gap: 16px;
+  }
+  .spinner {
+    width: 48px; height: 48px; border: 4px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .load-text { color: var(--muted); font-size: .95rem; font-weight: 700; }
+
+  /* ── Error ── */
+  .error-box {
+    background: rgba(255,107,53,.1); border: 1.5px solid var(--accent);
+    border-radius: 10px; padding: 20px; text-align: center;
+    color: var(--accent); font-weight: 700;
+  }
+
+  /* ── Back button top ── */
+  .view-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-bottom: 20px; cursor: pointer;
+    color: var(--muted); font-weight: 700; font-size: .9rem;
+    transition: color .15s;
+  }
+  .view-back:hover { color: var(--accent); }
+
+  /* ── Movie grid adjustments ── */
+  #movies-view .card-img { aspect-ratio: 2/3; }
+
+  /* ── No cover placeholder ── */
+  .no-cover {
+    width: 100%; aspect-ratio: 2/3;
+    background: linear-gradient(135deg, var(--surface2), var(--border));
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--muted);
+  }
+  .no-cover .icon { font-size: 2.5rem; }
+  .no-cover .nc-name { font-size: .7rem; font-weight: 700; text-align: center; padding: 0 6px; line-height: 1.3; }
+
+  /* ── Subtitle track note ── */
+  .sub-note { font-size: .75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="load-text">Loading your cartoon collection…</div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="header">
+    <div id="logo" onclick="goHome()">🎬 <span>Cartoon</span> Cabinet</div>
+    <div id="tabs">
+      <button class="tab active" id="tab-tv" onclick="switchTab('tv')">📺 TV Shows</button>
+      <button class="tab" id="tab-movies" onclick="switchTab('movies')">🎥 Movies</button>
+    </div>
+    <div id="search-wrap">
+      <input id="search" type="text" placeholder="Search…" oninput="doSearch(this.value)">
+    </div>
+  </div>
+
+  <!-- TV Shows grid -->
+  <div id="tv-view" class="view active">
+    <div id="tv-grid" class="card-grid"></div>
+  </div>
+
+  <!-- Movies grid -->
+  <div id="movies-view" class="view">
+    <div id="movies-grid" class="card-grid"></div>
+  </div>
+
+  <!-- Show detail -->
+  <div id="show-view" class="view">
+    <div class="view-back" onclick="backToGrid()">← Back</div>
+    <div id="show-hero-container"></div>
+    <div id="disclaimers-container"></div>
+    <div id="season-tabs-container" class="season-tabs"></div>
+    <div id="episodes-container"></div>
+  </div>
+
+  <!-- Player -->
+  <div id="player-view" class="view">
+    <div id="video-wrap">
+      <video id="main-video" controls autoplay crossorigin="anonymous"></video>
+    </div>
+    <div class="player-controls">
+      <button class="btn-back" onclick="backFromPlayer()">← Back to Episodes</button>
+      <div class="now-playing" id="now-playing-label">Now playing: <span id="now-playing-name"></span></div>
+      <div id="sub-select-wrap">
+        <span class="sub-note">💬 Subtitles:</span>
+        <select id="sub-select" onchange="switchSubtitle(this.value)">
+          <option value="">None</option>
+        </select>
+      </div>
+    </div>
+    <div id="ep-queue">
+      <h3>Up Next</h3>
+      <div class="queue-list" id="queue-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+const state = {
+  currentTab: 'tv',
+  tvShows: [],
+  movies: [],
+  currentShow: null,
+  currentShowData: null,
+  currentSeason: 0,
+  queue: [],
+  queueIndex: 0,
+  playerSource: null, // 'show' or 'movie'
+  subtracks: [],
+};
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const [tv, movies] = await Promise.all([
+      fetch('/api/tv').then(r => r.json()),
+      fetch('/api/movies').then(r => r.json()),
+    ]);
+    state.tvShows = tv;
+    state.movies = movies;
+    renderTV(tv);
+    renderMovies(movies);
+  } catch(e) {
+    document.getElementById('tv-grid').innerHTML =
+      `<div class="error-box">⚠️ Could not connect to server.<br>Make sure cartoon_server.py is running on port 7777.</div>`;
+  }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// ── Render helpers ────────────────────────────────────────────────────────────
+function imgUrl(encoded) {
+  if (!encoded) return null;
+  return `/file?path=${encoded}`;
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function locToFlag(loc) {
+  if (!loc) return '';
+  const map = {
+    'us': '🇺🇸', 'gb': '🇬🇧', 'ca': '🇨🇦', 'au': '🇦🇺',
+    'fr': '🇫🇷', 'de': '🇩🇪', 'es': '🇪🇸', 'it': '🇮🇹',
+    'nl': '🇳🇱', 'pl': '🇵🇱', 'ru': '🇷🇺', 'uk': '🇺🇦',
+    'jp': '🇯🇵', 'kr': '🇰🇷', 'cn': '🇨🇳', 'in': '🇮🇳',
+    'br': '🇧🇷', 'mx': '🇲🇽', 'se': '🇸🇪', 'ch': '🇨🇭',
+  };
+  return map[loc.toLowerCase()] || '';
+}
+
+function makeCard(thumb, name, campaign, icon, onClickFn) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.title = name;
+
+  if (campaign) {
+    const badge = document.createElement('div');
+    badge.className = 'campaign-badge';
+    badge.textContent = '📦 ' + campaign.replace('True and the Rainbow Kingdom','TRK');
+    card.appendChild(badge);
+  }
+
+  if (thumb) {
+    const img = document.createElement('img');
+    img.className = 'card-img';
+    img.loading = 'lazy';
+    img.alt = '';
+    img.src = imgUrl(thumb);
+    img.addEventListener('error', () => {
+      img.replaceWith(makePlaceholder(name, icon));
+    });
+    card.appendChild(img);
+  } else {
+    card.appendChild(makePlaceholder(name, icon));
+  }
+
+  const label = document.createElement('div');
+  label.className = 'card-label';
+  label.textContent = name;
+  card.appendChild(label);
+
+  card.addEventListener('click', onClickFn);
+  return card;
+}
+
+function makePlaceholder(name, icon) {
+  const div = document.createElement('div');
+  div.className = 'no-cover';
+  div.innerHTML = `<div class="icon">${icon||'📺'}</div><div class="nc-name">${esc(name)}</div>`;
+  return div;
+}
+
+// ── TV ────────────────────────────────────────────────────────────────────────
+function renderTV(shows) {
+  const grid = document.getElementById('tv-grid');
+  grid.innerHTML = '';
+  if (!shows.length) { grid.innerHTML = '<div class="error-box">No TV shows found.</div>'; return; }
+  shows.forEach((s, i) => {
+    grid.appendChild(makeCard(s.thumb, s.name, s.campaign, '📺', () => openShow(i)));
+  });
+}
+
+async function openShow(idx) {
+  const show = state.tvShows[idx];
+  state.currentShow = show;
+  showLoading(true);
+  try {
+    const data = await fetch(`/api/show?path=${show.path}`).then(r => r.json());
+    state.currentShowData = data;
+  } catch(e) { state.currentShowData = {seasons:[],specials:[],loose_episodes:[],english_episodes:[]}; }
+  showLoading(false);
+  renderShowDetail(show, state.currentShowData);
+  showView('show-view');
+}
+
+function renderShowDetail(show, data) {
+  // Hero
+  const fanartUrl = show.fanart ? imgUrl(show.fanart) : null;
+  const thumbUrl  = show.thumb  ? imgUrl(show.thumb)  : null;
+  
+  const flagEmoji = locToFlag(show.location);
+  const englishTitle = show.english ? `<div class="english-title">${esc(show.english)}</div>` : '';
+  const sourceText = show.source ? `<div class="source-text">📍 ${esc(show.source)}${show.source2 ? ' • ' + esc(show.source2) : ''}</div>` : '';
+  
+  const hero = `
+    <div class="show-hero">
+      ${fanartUrl ? `<img class="show-fanart" src="${fanartUrl}" alt="">` : '<div class="show-fanart" style="background:var(--surface2)"></div>'}
+      <div class="show-hero-overlay">
+        ${thumbUrl ? `<img class="show-thumb" src="${thumbUrl}" alt="${esc(show.name)}">` : ''}
+        <div class="show-info">
+          <h1>${flagEmoji ? `<span class="flag-emoji">${flagEmoji}</span>` : ''}${esc(show.name)}</h1>
+          ${englishTitle}
+          ${sourceText}
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('show-hero-container').innerHTML = hero;
+
+  // Disclaimers
+  const disclaimers = (show.disclaimers||[]).map((d,i) =>
+    `<div class="disclaimer-box"><strong>⚠️ Disclaimer${show.disclaimers.length>1?' '+(i+1):''}</strong>${esc(d)}</div>`
+  ).join('');
+  document.getElementById('disclaimers-container').innerHTML = disclaimers;
+
+  // Description
+  if (show.description) {
+    const descBox = document.createElement('div');
+    descBox.style.cssText = 'background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: .88rem; line-height: 1.6; color: var(--muted);';
+    descBox.textContent = show.description;
+    document.getElementById('disclaimers-container').appendChild(descBox);
+  }
+
+  // Build season tabs
+  const tabsCont = document.getElementById('season-tabs-container');
+  const tabs = [];
+  if (data.seasons.length) {
+    data.seasons.forEach((s,i) => tabs.push({label: `Season ${s.number}`, idx: i}));
+  }
+  if (data.loose_episodes.length) tabs.push({label: '📋 All Episodes', idx: -1});
+  if (data.specials.length) tabs.push({label: '⭐ Specials', idx: -2});
+  if (data.english_episodes.length) tabs.push({label: '🇬🇧 English', idx: -3});
+
+  if (tabs.length <= 1) {
+    tabsCont.innerHTML = '';
+  } else {
+    tabsCont.innerHTML = tabs.map(t =>
+      `<button class="season-tab${t.idx === state.currentSeason ? ' active' : ''}" onclick="selectSeason(${t.idx})">${t.label}</button>`
+    ).join('');
+  }
+
+  state.currentSeason = tabs.length ? tabs[0].idx : 0;
+  renderEpisodes(data, state.currentSeason);
+}
+
+function selectSeason(idx) {
+  state.currentSeason = idx;
+  document.querySelectorAll('.season-tab').forEach(b => {
+    b.classList.toggle('active', parseInt(b.getAttribute('onclick').match(/-?\d+/)[0]) === idx);
+  });
+  renderEpisodes(state.currentShowData, idx);
+}
+
+function renderEpisodes(data, seasonIdx) {
+  const cont = document.getElementById('episodes-container');
+  let episodes = [];
+  let label = '';
+
+  if (seasonIdx >= 0 && data.seasons.length) {
+    const s = data.seasons[seasonIdx];
+    episodes = s.episodes;
+    label = s.name;
+  } else if (seasonIdx === -1) {
+    episodes = data.loose_episodes;
+    label = 'All Episodes';
+  } else if (seasonIdx === -2) {
+    episodes = data.specials;
+    label = 'Specials';
+  } else if (seasonIdx === -3) {
+    episodes = data.english_episodes;
+    label = 'English Screening Episodes';
+  } else if (data.loose_episodes.length) {
+    episodes = data.loose_episodes;
+    label = 'Episodes';
+  }
+
+  // Also show specials below season episodes if we're in a season view and specials exist
+  let specialsExtra = '';
+  if (seasonIdx >= 0 && data.specials.length) {
+    specialsExtra = `<div class="sub-section-title">⭐ Specials</div>` + epListHTML(data.specials, 'specials');
+  }
+  let englishExtra = '';
+  if (seasonIdx >= 0 && data.english_episodes.length) {
+    englishExtra = `<div class="sub-section-title">🇬🇧 English Screening</div>` + epListHTML(data.english_episodes, 'english');
+  }
+
+  const allEpsForQueue = [...episodes];
+
+  cont.innerHTML = `
+    ${episodes.length ? epListHTML(episodes, 'main') : '<div class="error-box">No episodes found in this category.</div>'}
+    ${specialsExtra}
+    ${englishExtra}
+  `;
+
+  // Set queue
+  state.queue = episodes;
+}
+
+function epListHTML(eps, prefix) {
+  return `<div class="episode-list">` +
+    eps.map((ep, i) =>
+      `<div class="ep-item" onclick="playEpisode(${i}, '${prefix}')">
+        <div class="ep-num">${i+1}</div>
+        <div class="ep-name">${esc(ep.stem)}</div>
+        <div class="ep-play">▶</div>
+      </div>`
+    ).join('') +
+  `</div>`;
+}
+
+function playEpisode(idx, prefix) {
+  let eps;
+  const data = state.currentShowData;
+  const sIdx = state.currentSeason;
+
+  if (prefix === 'specials') eps = data.specials;
+  else if (prefix === 'english') eps = data.english_episodes;
+  else if (sIdx >= 0 && data.seasons.length) eps = data.seasons[sIdx].episodes;
+  else eps = data.loose_episodes;
+
+  state.queue = eps;
+  state.queueIndex = idx;
+  state.playerSource = 'show';
+  loadPlayer(eps, idx);
+}
+
+// ── Movies ────────────────────────────────────────────────────────────────────
+function renderMovies(movies) {
+  const grid = document.getElementById('movies-grid');
+  grid.innerHTML = '';
+  if (!movies.length) { grid.innerHTML = '<div class="error-box">No movies found.</div>'; return; }
+  movies.forEach((m, i) => {
+    grid.appendChild(makeCard(m.cover, m.name, null, '🎥', () => playMovie(i)));
+  });
+}
+
+function playMovie(idx) {
+  const movie = state.movies[idx];
+  state.queue = [movie];
+  state.queueIndex = 0;
+  state.playerSource = 'movie';
+  loadPlayer([movie], 0);
+}
+
+// ── Player ────────────────────────────────────────────────────────────────────
+async function loadPlayer(eps, idx) {
+  showView('player-view');
+  state.queueIndex = idx;
+  const ep = eps[idx];
+  const videoUrl = `/file?path=${ep.path}`;
+  const video = document.getElementById('main-video');
+
+  document.getElementById('now-playing-name').textContent = ep.stem || ep.name;
+
+  // Fetch subtitles
+  const subSel = document.getElementById('sub-select');
+  subSel.innerHTML = '<option value="">None</option>';
+  try {
+    const subs = await fetch(`/api/subtitles?path=${ep.path}`).then(r => r.json());
+    state.subtracks = subs;
+    subs.forEach((s, i) => {
+      const name = decodeURIComponent(s.file).split('/').pop();
+      const opt = document.createElement('option');
+      opt.value = s.file;
+      opt.textContent = name + (s.embedded ? ' (embedded)' : '');
+      subSel.appendChild(opt);
+    });
+    if (subs.length > 0) subSel.value = subs[0].file;
+  } catch(e) { state.subtracks = []; }
+
+  // Build video element with tracks
+  video.pause();
+  // Remove old tracks
+  while(video.firstChild) video.removeChild(video.firstChild);
+  const src = document.createElement('source');
+  src.src = videoUrl;
+  video.appendChild(src);
+
+  // Add subtitle tracks
+  state.subtracks.forEach((s, i) => {
+    if (s.embedded) return; // Skip embedded, browser handles them
+    const track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.label = decodeURIComponent(s.file).split('/').pop().replace(/\.[^.]+$/,'');
+    track.src = `/file?path=${s.file}`;
+    if (i === 0) { track.default = true; }
+    video.appendChild(track);
+  });
+
+  video.load();
+  video.play().catch(() => {});
+
+  // Sync subtitle select with tracks
+  if (state.subtracks.filter(s => !s.embedded).length > 0) {
+    video.addEventListener('loadedmetadata', () => {
+      for (let t of video.textTracks) {
+        t.mode = 'hidden';
+      }
+      if (video.textTracks[0]) video.textTracks[0].mode = 'showing';
+    }, {once: true});
+  }
+
+  // Queue
+  renderQueue(eps, idx);
+
+  // Auto-advance
+  video.onended = () => {
+    if (state.queueIndex < eps.length - 1) {
+      loadPlayer(eps, state.queueIndex + 1);
+    }
+  };
+}
+
+function switchSubtitle(encoded) {
+  const video = document.getElementById('main-video');
+  for (let t of video.textTracks) t.mode = 'hidden';
+  if (!encoded) return;
+  // Find matching track by src
+  for (let t of video.textTracks) {
+    if (t.id === encoded || (t.label && decodeURIComponent(encoded).endsWith(t.label.replace(/\.[^.]+$/, '') + '.'))) {
+      t.mode = 'showing'; break;
+    }
+  }
+  // Fallback: show first
+  if (encoded && video.textTracks[0]) video.textTracks[0].mode = 'showing';
+}
+
+function renderQueue(eps, currentIdx) {
+  const list = document.getElementById('queue-list');
+  list.innerHTML = eps.map((ep, i) =>
+    `<div class="queue-item${i===currentIdx?' playing':''}" onclick="loadPlayer(state.queue,${i})">
+      <span class="q-num">${i+1}</span>
+      <span class="q-name">${esc(ep.stem||ep.name)}</span>
+      ${i===currentIdx ? '▶' : ''}
+    </div>`
+  ).join('');
+  // Scroll to current
+  const cur = list.querySelector('.playing');
+  if (cur) cur.scrollIntoView({block:'nearest'});
+}
+
+function backFromPlayer() {
+  const video = document.getElementById('main-video');
+  video.pause();
+  if (state.playerSource === 'movie') {
+    showView('movies-view');
+  } else {
+    showView('show-view');
+  }
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function switchTab(tab) {
+  state.currentTab = tab;
+  document.getElementById('tab-tv').classList.toggle('active', tab==='tv');
+  document.getElementById('tab-movies').classList.toggle('active', tab==='movies');
+  showView(tab === 'tv' ? 'tv-view' : 'movies-view');
+  document.getElementById('search').value = '';
+}
+
+function backToGrid() {
+  const video = document.getElementById('main-video');
+  video.pause();
+  showView(state.currentTab === 'movies' ? 'movies-view' : 'tv-view');
+}
+
+function goHome() {
+  const video = document.getElementById('main-video');
+  video.pause();
+  showView(state.currentTab === 'tv' ? 'tv-view' : 'movies-view');
+}
+
+function doSearch(q) {
+  q = q.toLowerCase();
+  if (state.currentTab === 'tv') {
+    const filtered = q ? state.tvShows.filter(s => s.name.toLowerCase().includes(q)) : state.tvShows;
+    renderTV(filtered);
+  } else {
+    const filtered = q ? state.movies.filter(m => m.name.toLowerCase().includes(q)) : state.movies;
+    renderMovies(filtered);
+  }
+}
+
+function showLoading(on) {
+  document.getElementById('loading').style.display = on ? 'flex' : 'none';
+  if (!on) document.getElementById('app').style.display = 'block';
+}
+
+// ── Start ────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
