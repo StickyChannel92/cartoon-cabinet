@@ -55,9 +55,17 @@ VIDEO_EXTS = {
     '.3g2', '.f4v', '.asf', '.mxf', '.dv', '.qt', '.amv',
     '.m2v', '.mpv', '.tp', '.trp',
 }
+
+AUDIO_EXTS = {
+    '.mp3', '.m4a',
+}
 SUBTITLE_EXTS = {'.srt', '.vtt', '.ass', '.ssa', '.sub', '.idx'}
 
-def is_video(p): return Path(p).suffix.lower() in VIDEO_EXTS
+def is_video(p): 
+    return Path(p).suffix.lower() in VIDEO_EXTS
+
+def is_audio(p):
+    return Path(p).suffix.lower() in AUDIO_EXTS
 def is_subtitle(p): return Path(p).suffix.lower() in SUBTITLE_EXTS
 
 def natural_key(s):
@@ -129,13 +137,26 @@ def parse_metadata(directory):
     return data
 
 def get_episodes(directory):
-    """Direct video files in a single directory, sorted naturally."""
+    """Direct media files in a single directory, sorted naturally."""
     d = Path(directory)
-    if not d.exists(): return []
+    if not d.exists():
+        return []
+
     try:
-        videos = [f for f in d.iterdir() if f.is_file() and is_video(f)]
-        return sorted(videos, key=lambda f: natural_key(f.name))
-    except: return []
+        media = []
+
+        for f in d.iterdir():
+            if not f.is_file():
+                continue
+
+            if is_video(f):
+                media.append(f)
+            elif is_podcast(directory) and is_audio(f):
+                media.append(f)
+
+        return sorted(media, key=lambda f: natural_key(f.name))
+    except:
+        return []
 
 def get_episodes_recursive(directory):
     """All video files under a directory tree, sorted naturally."""
