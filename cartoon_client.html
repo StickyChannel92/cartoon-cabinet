@@ -461,7 +461,7 @@ function makePlaceholder(name, icon) {
   return div;
 }
 
-// ── TV ────────────────────────────────────────────────────────────
+// ── TV ──────���─────────────────────────────────────────────────────
 function renderTV(shows) {
   const grid = document.getElementById('tv-grid');
   grid.innerHTML = '';
@@ -588,15 +588,13 @@ function renderEpisodes(data, seasonIdx) {
     englishExtra = `<div class="sub-section-title">🇬🇧 English Screening</div>` + epListHTML(data.english_episodes, 'english');
   }
 
-  const allEpsForQueue = [...episodes];
-
   cont.innerHTML = `
     ${episodes.length ? epListHTML(episodes, 'main') : '<div class="error-box">No episodes found in this category.</div>'}
     ${specialsExtra}
     ${englishExtra}
   `;
 
-  // Set queue
+  // Set queue - use main episodes for normal season/category viewing
   state.queue = episodes;
 }
 
@@ -619,7 +617,8 @@ function playEpisode(idx, prefix) {
 
   if (prefix === 'specials') eps = data.specials;
   else if (prefix === 'english') eps = data.english_episodes;
-  else if (sIdx >= 0 && data.seasons.length) eps = data.seasons[sIdx].episodes;
+  else if (prefix === 'main' && sIdx >= 0 && data.seasons.length) eps = data.seasons[sIdx].episodes;
+  else if (prefix === 'main') eps = data.loose_episodes;
   else eps = data.loose_episodes;
 
   state.queue = eps;
@@ -647,7 +646,7 @@ function playMovie(idx) {
   loadPlayer([movie], 0);
 }
 
-// ── Player ────────────────────────────────────────────────────────────
+// ── Player ────────────────��───────────────────────────────────────────
 async function loadPlayer(eps, idx) {
   showView('player-view');
   state.queueIndex = idx;
