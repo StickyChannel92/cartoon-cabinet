@@ -376,6 +376,7 @@ const state = {
   playerSource: null, // 'show' or 'movie'
   subtracks: [],
   tvScrollY: 0,
+  currentPlayingQueue: [], // Track what queue is currently playing
 };
 
 // ── Init ────────────────────────────────────────────────────────────
@@ -461,7 +462,7 @@ function makePlaceholder(name, icon) {
   return div;
 }
 
-// ── TV ──────���─────────────────────────────────────────────────────
+// ── TV ────────────────────────────────────────────────────────────
 function renderTV(shows) {
   const grid = document.getElementById('tv-grid');
   grid.innerHTML = '';
@@ -622,6 +623,7 @@ function playEpisode(idx, prefix) {
   else eps = data.loose_episodes;
 
   state.queue = eps;
+  state.currentPlayingQueue = eps;
   state.queueIndex = idx;
   state.playerSource = 'show';
   loadPlayer(eps, idx);
@@ -641,12 +643,13 @@ function renderMovies(movies) {
 function playMovie(idx) {
   const movie = state.movies[idx];
   state.queue = [movie];
+  state.currentPlayingQueue = [movie];
   state.queueIndex = 0;
   state.playerSource = 'movie';
   loadPlayer([movie], 0);
 }
 
-// ── Player ────────────────��───────────────────────────────────────────
+// ── Player ────────────────────────────────────────────────────────────
 async function loadPlayer(eps, idx) {
   showView('player-view');
   state.queueIndex = idx;
@@ -732,7 +735,7 @@ function switchSubtitle(encoded) {
 function renderQueue(eps, currentIdx) {
   const list = document.getElementById('queue-list');
   list.innerHTML = eps.map((ep, i) =>
-    `<div class="queue-item${i===currentIdx?' playing':''}" onclick="loadPlayer(state.queue,${i})">
+    `<div class="queue-item${i===currentIdx?' playing':''}" onclick="playFromQueue(${i})">
       <span class="q-num">${i+1}</span>
       <span class="q-name">${esc(ep.stem||ep.name)}</span>
       ${i===currentIdx ? '▶' : ''}
@@ -741,6 +744,10 @@ function renderQueue(eps, currentIdx) {
   // Scroll to current
   const cur = list.querySelector('.playing');
   if (cur) cur.scrollIntoView({block:'nearest'});
+}
+
+function playFromQueue(idx) {
+  loadPlayer(state.currentPlayingQueue, idx);
 }
 
 function backFromPlayer() {
