@@ -560,23 +560,29 @@ function renderEpisodes(data, seasonIdx) {
   const cont = document.getElementById('episodes-container');
   let episodes = [];
   let label = '';
+  let prefix = 'main';
 
   if (seasonIdx >= 0 && data.seasons.length) {
     const s = data.seasons[seasonIdx];
     episodes = s.episodes;
     label = s.name;
+    prefix = 'main';
   } else if (seasonIdx === -1) {
     episodes = data.loose_episodes;
     label = 'All Episodes';
+    prefix = 'main';
   } else if (seasonIdx === -2) {
     episodes = data.specials;
     label = 'Specials';
+    prefix = 'specials';
   } else if (seasonIdx === -3) {
     episodes = data.english_episodes;
     label = 'English Screening Episodes';
+    prefix = 'english';
   } else if (data.loose_episodes.length) {
     episodes = data.loose_episodes;
     label = 'Episodes';
+    prefix = 'main';
   }
 
   // Also show specials below season episodes if we're in a season view and specials exist
@@ -590,7 +596,7 @@ function renderEpisodes(data, seasonIdx) {
   }
 
   cont.innerHTML = `
-    ${episodes.length ? epListHTML(episodes, 'main') : '<div class="error-box">No episodes found in this category.</div>'}
+    ${episodes.length ? epListHTML(episodes, prefix) : '<div class="error-box">No episodes found in this category.</div>'}
     ${specialsExtra}
     ${englishExtra}
   `;
