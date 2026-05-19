@@ -262,7 +262,7 @@ def scan_tv():
             if not show.is_dir(): continue
             if should_skip(show): continue
 
-            # ── Misc flat-dump folder ────────────────────────────��────────
+            # ── Misc flat-dump folder ────────────────────────────────
             if is_misc(show):
                 key = str(show.resolve())
                 if key in seen: continue
@@ -287,7 +287,7 @@ def scan_tv():
                 misc_shows.append(shows_entry)
                 continue
 
-            # ── Multi-show directory (campaign) ───────────────────────────
+            # ── Multi-show directory (campaign) ──────────────────────────���
             if is_multi_show(show):
                 try:
                     subs = sorted(show.iterdir(), key=lambda x: natural_key(x.name))
@@ -414,7 +414,7 @@ def get_subs_for(video_path):
     
     return subs
 
-# ── Subtitle converters ───────────────────────────────────────────────────────
+# ── Subtitle converters ────────────────────────────────────────────────────────
 def srt_to_vtt(text):
     out = ['WEBVTT', '']
     for line in text.replace('\r\n', '\n').replace('\r', '\n').split('\n'):
@@ -450,7 +450,7 @@ def ass_to_vtt(text):
                     lines += [f'{start} --> {end}', txt, '']
     return '\n'.join(lines)
 
-# ── Routes ────────────────────────────────────────────────────────────────────
+# ── Routes ───────────────────────────────────────────────────────────────────
 @app.route('/api/tv')
 def api_tv(): return jsonify(scan_tv())
 
@@ -490,6 +490,10 @@ def serve_file():
         return Response(ass_to_vtt(read_text(p) or ''), mimetype='text/vtt')
     if suf == '.vtt':
         return send_file(str(p), mimetype='text/vtt')
+
+    # Handle .ts files with video/mp2t mime type for proper HTML5 video support
+    if suf == '.ts':
+        mime = 'video/mp2t'
 
     rng = request.headers.get('Range', '')
     if rng and mime and mime.startswith('video'):
