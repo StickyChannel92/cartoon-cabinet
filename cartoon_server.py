@@ -287,7 +287,7 @@ def scan_tv():
                 misc_shows.append(shows_entry)
                 continue
 
-            # ── Multi-show directory (campaign) ──────────────────────────���
+            # ── Multi-show directory (campaign) ──────────────────────────
             if is_multi_show(show):
                 try:
                     subs = sorted(show.iterdir(), key=lambda x: natural_key(x.name))
@@ -480,20 +480,23 @@ def serve_file():
     roots = ['/mnt/E8A64F15A64EE3A2', '/media/sagan/BucketofCartoons']
     if not any(resolved.startswith(r) for r in roots): abort(403)
 
-    mime, _ = mimetypes.guess_type(str(p))
-    if not mime: mime = 'application/octet-stream'
-
     suf = p.suffix.lower()
+    mime, _ = mimetypes.guess_type(str(p))
+    
+    # Override mime type for specific formats
+    if suf == '.ts':
+        mime = 'video/mp2t'
+    elif suf == '.mkv':
+        mime = 'video/x-matroska'
+    elif not mime:
+        mime = 'application/octet-stream'
+    
     if suf == '.srt':
         return Response(srt_to_vtt(read_text(p) or ''), mimetype='text/vtt')
     if suf in ('.ass', '.ssa'):
         return Response(ass_to_vtt(read_text(p) or ''), mimetype='text/vtt')
     if suf == '.vtt':
         return send_file(str(p), mimetype='text/vtt')
-
-    # Handle .ts files with video/mp2t mime type for proper HTML5 video support
-    if suf == '.ts':
-        mime = 'video/mp2t'
 
     rng = request.headers.get('Range', '')
     if rng and mime and mime.startswith('video'):
